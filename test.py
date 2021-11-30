@@ -148,9 +148,6 @@ def validate(opts, model, loader, device):
                     plt.imshow(image)
                     plt.axis('off')
                     plt.imshow(pred, alpha=0.7)
-                    ax = plt.gca()
-                    ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                    ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
                     plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
                     plt.close()
                     img_id += 1
