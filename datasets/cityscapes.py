@@ -113,9 +113,9 @@ class Cityscapes(data.Dataset):
             than one item. Otherwise target is a json object if target_type="polygon", else the image segmentation.
         """
         image = Image.open(self.images[index]).convert('RGB')
-        # image = image.resize((2048,1024),Image.BILINEAR)
+        image = image.resize((2048,1024),Image.BILINEAR)
         target_ = Image.open(self.images[index]).convert('L')
-        # target_ = target_.resize((2048,1024),Image.BILINEAR)
+        target_ = target_.resize((2048,1024),Image.BILINEAR)
         if self.transform:
             image,target_= self.transform(image,target_)
         # target = torch.LongTensor([1.])

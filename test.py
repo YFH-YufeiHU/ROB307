@@ -8,9 +8,8 @@ import numpy as np
 import time
 
 from torch.utils import data
-from datasets import VOCSegmentation, Cityscapes
+from datasets import Cityscapes
 from utils import ext_transforms as et
-from metrics import StreamSegMetrics
 
 import torch
 import torch.nn as nn
@@ -27,8 +26,7 @@ def get_argparser():
     # Datset Options
     parser.add_argument("--data_root", type=str, default='./data',
                         help="path to Dataset")
-    parser.add_argument("--dataset", type=str, default='cityscapes',
-                        choices=['voc', 'cityscapes'], help='Name of dataset')
+    parser.add_argument("--dataset", type=str, default='cityscapes')
     parser.add_argument("--num_classes", type=int, default=None,
                         help="num classes (default: None)")
 
@@ -79,53 +77,12 @@ def get_argparser():
     parser.add_argument("--download", action='store_true', default=False,
                         help="download datasets")
 
-    # PASCAL VOC Options
-    parser.add_argument("--year", type=str, default='2012',
-                        choices=['2012_aug', '2012', '2011', '2009', '2008', '2007'], help='year of VOC')
-
-    # Visdom options
-    parser.add_argument("--enable_vis", action='store_true', default=False,
-                        help="use visdom for visualization")
-    parser.add_argument("--vis_port", type=str, default='13570',
-                        help='port for visdom')
-    parser.add_argument("--vis_env", type=str, default='main',
-                        help='env for visdom')
-    parser.add_argument("--vis_num_samples", type=int, default=8,
-                        help='number of samples for visualization (default: 8)')
     return parser
 
 
 def get_dataset(opts):
     """ Dataset And Augmentation
     """
-    if opts.dataset == 'voc':
-        train_transform = et.ExtCompose([
-            #et.ExtResize(size=opts.crop_size),
-            et.ExtRandomScale((0.5, 2.0)),
-            et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size), pad_if_needed=True),
-            et.ExtRandomHorizontalFlip(),
-            et.ExtToTensor(),
-            et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                            std=[0.229, 0.224, 0.225]),
-        ])
-        if opts.crop_val:
-            val_transform = et.ExtCompose([
-                et.ExtResize(opts.crop_size),
-                et.ExtCenterCrop(opts.crop_size),
-                et.ExtToTensor(),
-                et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                                std=[0.229, 0.224, 0.225]),
-            ])
-        else:
-            val_transform = et.ExtCompose([
-                et.ExtToTensor(),
-                et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                                std=[0.229, 0.224, 0.225]),
-            ])
-        train_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
-                                    image_set='train', download=opts.download, transform=train_transform)
-        val_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
-                                  image_set='val', download=False, transform=val_transform)
 
     if opts.dataset == 'cityscapes':
         train_transform = et.ExtCompose([
@@ -203,9 +160,7 @@ def validate(opts, model, loader, device):
 
 def main():
     opts = get_argparser().parse_args()
-    if opts.dataset.lower() == 'voc':
-        opts.num_classes = 21
-    elif opts.dataset.lower() == 'cityscapes':
+    if opts.dataset.lower() == 'cityscapes':
         opts.num_classes = 19
 
     os.environ['CUDA_VISIBLE_DEVICES'] = opts.gpu_id
